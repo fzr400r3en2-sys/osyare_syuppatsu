@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="おしゃれして しゅっぱつ！のアイコン">
+  <rect width="512" height="512" rx="112" fill="#fff1b8"/>
+  <circle cx="256" cy="205" r="82" fill="#ffd7b5" stroke="#5f493f" stroke-width="16"/>
+  <path d="M176 163c24-54 129-54 160 2 1 10-15 24-35 21-19-3-36-17-57-8-31 13-65 4-68-15z" fill="#6d4a35"/>
+  <circle cx="226" cy="205" r="10" fill="#40322d"/>
+  <circle cx="286" cy="205" r="10" fill="#40322d"/>
+  <path d="M230 242c18 15 37 15 54 0" fill="none" stroke="#40322d" stroke-width="12" stroke-linecap="round"/>
+  <path d="M158 323c24-74 172-74 196 0l18 91H140l18-91z" fill="#80cfa4" stroke="#5f493f" stroke-width="16" stroke-linejoin="round"/>
+  <path d="M169 143c13-67 161-67 174 0 1 14-16 29-39 30H207c-23-1-40-16-38-30z" fill="#ffd45e" stroke="#5f493f" stroke-width="16"/>
+  <path d="M145 165h222" stroke="#5f493f" stroke-width="24" stroke-linecap="round"/>
+  <path d="M95 377c39 27 77 43 118 49M417 377c-39 27-77 43-118 49" stroke="#ff8aa0" stroke-width="22" stroke-linecap="round"/>
+  <circle cx="114" cy="113" r="24" fill="#ffffff"/>
+  <circle cx="399" cy="119" r="18" fill="#91d8ff"/>
+  <circle cx="395" cy="364" r="28" fill="#ffffff"/>
+</svg>

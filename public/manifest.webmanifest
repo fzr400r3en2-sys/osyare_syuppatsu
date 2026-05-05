@@ -1,0 +1,19 @@
+{
+  "name": "おしゃれして しゅっぱつ！",
+  "short_name": "しゅっぱつ",
+  "description": "タップだけで遊べる幼児向け着せ替えごっこWebゲームです。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff8e6",
+  "theme_color": "#ffe8a8",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
