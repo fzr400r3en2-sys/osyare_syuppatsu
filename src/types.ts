@@ -15,6 +15,9 @@ export interface DressItem {
   category: CategoryId;
   name: string;
   shortName: string;
+  asset: string;
+  worldEffect?: string;
+  rewardEffect?: string;
 }
 
 export type SelectionIndexes = Record<CategoryId, number>;
@@ -26,6 +29,7 @@ export interface Destination {
   title: string;
   shortTitle: string;
   sceneryLabel: string;
+  bgAsset: string;
   rewardLine: string;
   matchItems: Record<CategoryId, string>;
   matchLines: {

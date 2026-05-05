@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { playSound } from "./audio";
 import {
   categoryOrder,
@@ -12,40 +12,79 @@ import {
 } from "./data";
 import type { CategoryDefinition, CategoryId, Destination, SelectedItems, SelectionIndexes } from "./types";
 
+const overrideModules = import.meta.glob<string>("./overrideAssets/**/*.{png,webp}", {
+  eager: true,
+  query: "?url",
+  import: "default",
+});
+const overrideAssets = new Map<string, string>(
+  Object.entries(overrideModules).map(([path, url]) => [
+    path.replace("./overrideAssets/", "").replace(/\.(png|webp)$/i, ""),
+    url,
+  ]),
+);
+const assetRoot = `${import.meta.env.BASE_URL}assets/`;
+const rewardOverlayAsset = "overlays/confetti.svg";
+
+function resolveAsset(asset: string) {
+  return overrideAssets.get(asset.replace(/\.svg$/i, "")) ?? `${assetRoot}${asset}`;
+}
+
+function uniqueAssets(assets: Array<string | undefined>) {
+  return Array.from(new Set(assets.filter((asset): asset is string => Boolean(asset))));
+}
+
+function selectedItemList(selectedItems: SelectedItems) {
+  return categoryOrder.map((category) => selectedItems[category.id]);
+}
+
+function LayerImage({ asset, className }: { asset: string; className: string }) {
+  const assetClassName = asset
+    .replace(/\.svg$/i, "")
+    .replace(/[^a-z0-9]+/gi, "-")
+    .toLowerCase();
+
+  return (
+    <img
+      className={`stage-layer ${className} asset-${assetClassName}`}
+      src={resolveAsset(asset)}
+      alt=""
+      draggable={false}
+    />
+  );
+}
+
 function SceneDecorations({
+  selectedItems,
   destination,
   compatibilityScore,
   isReward,
 }: {
+  selectedItems: SelectedItems;
   destination: Destination;
   compatibilityScore: number;
   isReward: boolean;
 }) {
-  const matchLevel = Math.min(compatibilityScore, 3);
+  const items = selectedItemList(selectedItems);
+  const overlayBackAssets = isReward
+    ? uniqueAssets(items.map((item) => item.worldEffect))
+    : uniqueAssets(
+        items
+          .filter((item) => destination.matchItems[item.category] === item.id && compatibilityScore >= 2)
+          .map((item) => item.worldEffect),
+      );
+  const overlayFrontAssets = isReward ? uniqueAssets([...items.map((item) => item.rewardEffect), rewardOverlayAsset]) : [];
 
   return (
-    <div
-      className={`scene-decor scene-${destination.id} match-level-${matchLevel} ${isReward ? "reward-active" : ""}`}
-      aria-hidden="true"
-    >
-      <span className="sun-or-moon" />
-      <span className="cloud cloud-one" />
-      <span className="cloud cloud-two" />
-      <span className="slide-shape" />
-      <span className="puddle puddle-one" />
-      <span className="puddle puddle-two" />
-      <span className="rain-drop drop-one" />
-      <span className="rain-drop drop-two" />
-      <span className="rain-drop drop-three" />
-      <span className="star-dot star-one" />
-      <span className="star-dot star-two" />
-      <span className="star-dot star-three" />
-      <span className="flower flower-one" />
-      <span className="flower flower-two" />
-      <span className="flower flower-three" />
-      <span className="soft-hill hill-one" />
-      <span className="soft-hill hill-two" />
-    </div>
+    <>
+      <LayerImage asset={destination.bgAsset} className="layer-background" />
+      {overlayBackAssets.map((asset) => (
+        <LayerImage key={`back-${asset}`} asset={asset} className="layer-overlay-back" />
+      ))}
+      {overlayFrontAssets.map((asset) => (
+        <LayerImage key={`front-${asset}`} asset={asset} className="layer-overlay-front" />
+      ))}
+    </>
   );
 }
 
@@ -53,70 +92,30 @@ function Character({
   selectedItems,
   destination,
   isReward,
-  compatibilityScore,
+  isCharging,
 }: {
   selectedItems: SelectedItems;
   destination: Destination;
   isReward: boolean;
-  compatibilityScore: number;
+  isCharging: boolean;
 }) {
   const label = `${selectedItems.hat.name}、${selectedItems.clothes.name}、${selectedItems.shoes.name}、${selectedItems.item.name}`;
 
   return (
-    <div className="character-frame">
-      <div
-        className={`character character-${destination.id} prop-${selectedItems.item.id} ${
-          isReward ? "character-reward" : ""
-        } match-score-${Math.min(compatibilityScore, 3)}`}
-        role="img"
-        aria-label={`おでかけのじゅんびをしたこども。${label}`}
-      >
-        <div className="character-shadow" />
-        <div className={`prop prop-wear-${selectedItems.item.id}`} aria-hidden="true">
-          <span className="prop-part prop-main" />
-          <span className="prop-part prop-top" />
-          <span className="prop-part prop-line" />
-          <span className="prop-part prop-handle" />
-        </div>
-        <div className="body-back" aria-hidden="true">
-          <span className="arm arm-left" />
-          <span className="arm arm-right" />
-        </div>
-        <div className={`hat hat-${selectedItems.hat.id}`} aria-hidden="true">
-          <span className="hat-part hat-top" />
-          <span className="hat-part hat-brim" />
-          <span className="hat-part hat-pom" />
-        </div>
-        <div className="head">
-          <span className="hair hair-left" />
-          <span className="hair hair-right" />
-          <span className="eye eye-left" />
-          <span className="eye eye-right" />
-          <span className="cheek cheek-left" />
-          <span className="cheek cheek-right" />
-          <span className="mouth" />
-        </div>
-        <div className={`torso clothes-${selectedItems.clothes.id}`} aria-hidden="true">
-          <span className="hood" />
-          <span className="collar collar-left" />
-          <span className="collar collar-right" />
-          <span className="zipper" />
-          <span className="pocket" />
-          <span className="clothes-dot dot-one" />
-          <span className="clothes-dot dot-two" />
-          <span className="clothes-dot dot-three" />
-        </div>
-        <div className="legs" aria-hidden="true">
-          <span className="leg leg-left" />
-          <span className="leg leg-right" />
-        </div>
-        <div className={`feet shoes-${selectedItems.shoes.id}`} aria-hidden="true">
-          <span className="foot foot-left" />
-          <span className="foot foot-right" />
-          <span className="sock-cuff cuff-left" />
-          <span className="sock-cuff cuff-right" />
-        </div>
-      </div>
+    <div
+      className={`character character-${destination.id} ${isReward ? "character-reward" : ""} ${
+        isCharging ? "character-charging" : ""
+      }`}
+      role="img"
+      aria-label={`おでかけのじゅんびをしたこども。${label}`}
+    >
+      <LayerImage asset="character/base.svg" className="character-base" />
+      <LayerImage asset={selectedItems.clothes.asset} className="character-clothes" />
+      <LayerImage asset={selectedItems.shoes.asset} className="character-shoes" />
+      <LayerImage asset={selectedItems.hat.asset} className="character-hat" />
+      <LayerImage asset={selectedItems.item.asset} className="character-item" />
+      {/* 顔は専用レイヤーで最後に重ね、装備画像の上から目・頬・口を守ります。 */}
+      <LayerImage asset="character/face.svg" className="character-face" />
     </div>
   );
 }
@@ -145,28 +144,82 @@ function ReactionBubble({
   );
 }
 
-function CategoryButton({
-  category,
-  item,
-  onClick,
+function PreparedTracker({
+  selections,
+  preparedCount,
 }: {
-  category: CategoryDefinition;
-  item: SelectedItems[CategoryId];
-  onClick: () => void;
+  selections: SelectionIndexes;
+  preparedCount: number;
 }) {
   return (
-    <button
-      type="button"
-      className={`category-button ${category.iconClass} selected-${item.id}`}
-      onClick={onClick}
-      aria-label={`${category.label}をかえる。いまは${item.name}`}
-    >
-      <span className="button-icon" aria-hidden="true">
-        <span />
+    <div className={`prepared-tracker prepared-count-${preparedCount}`} aria-label={`じゅんび ${preparedCount}こ`}>
+      <span className="prepared-label">じゅんび</span>
+      <div className="prepared-steps" aria-hidden="true">
+        {categoryOrder.map((category) => {
+          const isFilled = selections[category.id] !== initialSelections[category.id];
+
+          return (
+            <span
+              key={category.id}
+              className={`prepared-step prepared-${category.id} ${isFilled ? "is-filled" : "is-empty"}`}
+            >
+              <span />
+            </span>
+          );
+        })}
+      </div>
+      <span className="prepared-count">{preparedCount}/4</span>
+    </div>
+  );
+}
+
+function CategorySelector({
+  category,
+  selectedIndex,
+  onSelect,
+}: {
+  category: CategoryDefinition;
+  selectedIndex: number;
+  onSelect: (itemIndex: number) => void;
+}) {
+  const items = itemsByCategory[category.id];
+
+  return (
+    <div className={`category-row category-${category.id}`}>
+      <span className="category-label">{category.label}</span>
+      <span className="option-grid" role="group" aria-label={`${category.label}をえらぶ`}>
+        {items.map((item, itemIndex) => {
+          const isSelected = itemIndex === selectedIndex;
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              className={`option-button option-${category.id} item-${item.id} ${isSelected ? "is-selected" : ""}`}
+              onClick={() => onSelect(itemIndex)}
+              aria-label={`${category.label}: ${item.name}`}
+              aria-pressed={isSelected}
+            >
+              <span className="option-thumb" aria-hidden="true">
+                <img src={resolveAsset(item.asset)} alt="" draggable={false} />
+              </span>
+              <span className="option-name">{item.shortName}</span>
+            </button>
+          );
+        })}
       </span>
-      <span className="button-label">{category.label}</span>
-      <span className="button-item">{item.shortName}</span>
-    </button>
+    </div>
+  );
+}
+
+function ChargeLights() {
+  return (
+    <div className="charge-lights" aria-hidden="true">
+      <span />
+      <span />
+      <span />
+      <span />
+    </div>
   );
 }
 
@@ -175,8 +228,10 @@ export default function App() {
   const [selections, setSelections] = useState<SelectionIndexes>(initialSelections);
   const [soundOn, setSoundOn] = useState(true);
   const [isReward, setIsReward] = useState(false);
+  const [isCharging, setIsCharging] = useState(false);
   const [reactionText, setReactionText] = useState("どれにする？");
   const [reactionKey, setReactionKey] = useState(0);
+  const chargeTimerRef = useRef<number | null>(null);
 
   const destination = destinations[destinationIndex];
   const selectedItems = useMemo(() => getSelectedItems(selections), [selections]);
@@ -185,6 +240,15 @@ export default function App() {
     [destination, selectedItems],
   );
   const preparedCount = useMemo(() => getPreparedCount(selections), [selections]);
+
+  function clearChargeTimer() {
+    if (chargeTimerRef.current !== null) {
+      window.clearTimeout(chargeTimerRef.current);
+      chargeTimerRef.current = null;
+    }
+  }
+
+  useEffect(() => () => clearChargeTimer(), []);
 
   useEffect(() => {
     if (!isReward) {
@@ -206,17 +270,19 @@ export default function App() {
     playSound(soundName, soundOn);
   }
 
-  function cycleCategory(categoryId: CategoryId) {
-    const itemList = itemsByCategory[categoryId];
+  function selectCategoryItem(categoryId: CategoryId, itemIndex: number) {
     const nextSelections = {
       ...selections,
-      [categoryId]: (selections[categoryId] + 1) % itemList.length,
+      [categoryId]: itemIndex,
     };
     const nextItems = getSelectedItems(nextSelections);
     const nextScore = getCompatibilityScore(nextItems, destination);
     const nextPreparedCount = getPreparedCount(nextSelections);
 
     setSelections(nextSelections);
+    setIsReward(false);
+    setIsCharging(false);
+    clearChargeTimer();
     showReaction(
       getReactionText(nextPreparedCount, nextScore, destination),
       nextScore >= 2 || nextScore > compatibilityScore ? "sparkle" : "dress",
@@ -226,24 +292,42 @@ export default function App() {
   function nextDestination() {
     const nextIndex = (destinationIndex + 1) % destinations.length;
     const nextDestinationValue = destinations[nextIndex];
+    clearChargeTimer();
     setDestinationIndex(nextIndex);
     setIsReward(false);
+    setIsCharging(false);
     showReaction(nextDestinationValue.title, "sparkle");
   }
 
   function resetDressUp() {
+    clearChargeTimer();
     setSelections(initialSelections);
     setIsReward(false);
-    showReaction("すっきり えらぼう", "reset");
+    setIsCharging(false);
+    showReaction("さいしょに もどそう", "reset");
   }
 
   function launchReward() {
-    setIsReward(true);
-    showReaction(destination.rewardLine, "launch");
+    if (isReward || isCharging) {
+      return;
+    }
+
+    clearChargeTimer();
+    setIsCharging(true);
+    showReaction("しゅっぱーつ！", "launch");
+    chargeTimerRef.current = window.setTimeout(() => {
+      chargeTimerRef.current = null;
+      setIsCharging(false);
+      setIsReward(true);
+      showReaction(destination.rewardLine, "sparkle");
+    }, 1200);
   }
 
   function playAgain() {
+    clearChargeTimer();
+    setSelections(initialSelections);
     setIsReward(false);
+    setIsCharging(false);
     showReaction("もういちど えらぼう", "reset");
   }
 
@@ -258,48 +342,52 @@ export default function App() {
   }
 
   return (
-    <main className={`app destination-${destination.id} ${isReward ? "reward-mode" : "dress-mode"}`}>
+    <main
+      className={`app destination-${destination.id} ${isReward ? "reward-mode" : "dress-mode"} ${
+        isCharging ? "is-charging" : ""
+      }`}
+    >
       <header className="top-bar">
         <div className="title-area">
           <h1>おしゃれして しゅっぱつ！</h1>
-          <p className="destination-badge" aria-label={destination.sceneryLabel}>
-            {destination.title}
-          </p>
+          <button
+            type="button"
+            className="destination-card"
+            onClick={nextDestination}
+            aria-label={`おでかけをかえる。${destination.title}`}
+          >
+            <span className="destination-thumb" aria-hidden="true">
+              <img src={resolveAsset(destination.bgAsset)} alt="" draggable={false} />
+            </span>
+            <span className="destination-title">{destination.title}</span>
+          </button>
         </div>
         <div className="parent-controls" aria-label="おとなのそうさ">
           <button
             type="button"
             className={`parent-button sound-button ${soundOn ? "is-on" : "is-off"}`}
             onClick={toggleSound}
-            aria-label={soundOn ? "音をオフにする" : "音をオンにする"}
+            aria-label={soundOn ? "音をしずかにする" : "音をならす"}
           >
-            {soundOn ? "おとON" : "おとOFF"}
+            {soundOn ? "おとON" : "しずか"}
           </button>
-          <button type="button" className="parent-button" onClick={resetDressUp} aria-label="服をリセットする">
-            リセット
-          </button>
-          <button
-            type="button"
-            className="parent-button next-button"
-            onClick={nextDestination}
-            aria-label="つぎのおでかけにする"
-          >
-            つぎのおでかけ
+          <button type="button" className="parent-button reset-button" onClick={resetDressUp} aria-label="さいしょにもどす">
+            <span aria-hidden="true">↺</span>
           </button>
         </div>
       </header>
 
-      <section className={`stage match-level-${Math.min(compatibilityScore, 3)}`} aria-label="きせかえのばしょ">
-        <SceneDecorations destination={destination} compatibilityScore={compatibilityScore} isReward={isReward} />
+      <section className={`stage match-level-${Math.min(compatibilityScore, 3)}`} aria-label={destination.sceneryLabel}>
+        <SceneDecorations
+          selectedItems={selectedItems}
+          destination={destination}
+          compatibilityScore={compatibilityScore}
+          isReward={isReward}
+        />
+        <Character selectedItems={selectedItems} destination={destination} isReward={isReward} isCharging={isCharging} />
+        {isCharging ? <ChargeLights /> : null}
+        <PreparedTracker selections={selections} preparedCount={preparedCount} />
         <ReactionBubble text={reactionText} reactionKey={reactionKey} compatibilityScore={compatibilityScore} />
-        <div className="stage-center">
-          <Character
-            selectedItems={selectedItems}
-            destination={destination}
-            isReward={isReward}
-            compatibilityScore={compatibilityScore}
-          />
-        </div>
       </section>
 
       <footer className={`bottom-controls ${isReward ? "reward-controls" : ""}`}>
@@ -309,15 +397,23 @@ export default function App() {
           </button>
         ) : (
           <>
-            {categoryOrder.map((category) => (
-              <CategoryButton
-                key={category.id}
-                category={category}
-                item={selectedItems[category.id]}
-                onClick={() => cycleCategory(category.id)}
-              />
-            ))}
-            <button type="button" className="launch-button" onClick={launchReward} aria-label="しゅっぱつする">
+            <div className="category-panel">
+              {categoryOrder.map((category) => (
+                <CategorySelector
+                  key={category.id}
+                  category={category}
+                  selectedIndex={selections[category.id]}
+                  onSelect={(itemIndex) => selectCategoryItem(category.id, itemIndex)}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              className="launch-button"
+              onClick={launchReward}
+              aria-label="しゅっぱつする"
+              disabled={isCharging}
+            >
               しゅっぱーつ！
             </button>
           </>

@@ -1,0 +1,10 @@
+<svg viewBox="0 0 800 1000" xmlns="http://www.w3.org/2000/svg" data-draw-bounds="278 748 522 826">
+  <g stroke="#5b4438" stroke-width="12" stroke-linejoin="round">
+    <path d="M294 756h104c24 0 44 20 44 44v22H278v-28c0-22 8-38 16-38z" fill="#f36f5f"/>
+    <path d="M402 756h104c8 0 16 16 16 38v28H358v-22c0-24 20-44 44-44z" fill="#f36f5f"/>
+    <path d="M286 820h154" stroke="#ffffff" stroke-linecap="round"/>
+    <path d="M360 820h154" stroke="#ffffff" stroke-linecap="round"/>
+  </g>
+  <path d="M328 786h64M408 786h64" stroke="#ffffff" stroke-width="10" stroke-linecap="round"/>
+  <path d="M336 800l34-24M416 800l34-24" stroke="#fff6c8" stroke-width="6" stroke-linecap="round" opacity=".72"/>
+</svg>
