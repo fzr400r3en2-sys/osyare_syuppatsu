@@ -4,12 +4,18 @@
     <path d="M280 196h240c28 0 50 8 50 18 0 13-58 21-170 21s-170-8-170-21c0-10 22-18 50-18z" fill="#a7e8ff"/>
     <path d="M306 204c-18 12-24 22-12 29 18 0 30-8 32-25z" fill="#65c7ff"/>
     <path d="M494 204c18 12 24 22 12 29-18 0-30-8-32-25z" fill="#65c7ff"/>
-    <path d="M332 200h136" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity=".54"/>
+    <path d="M332 200h136" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity=".58"/>
+    <path d="M312 220c44 8 132 8 176 0" fill="none" stroke="#3aa4dd" stroke-width="6" stroke-linecap="round" opacity=".58"/>
   </g>
   <path d="M350 142c24 22 76 22 100 0" fill="none" stroke="#effbff" stroke-width="12" stroke-linecap="round"/>
-  <g fill="#ffffff" opacity=".75">
+  <g fill="#ffffff" opacity=".82">
     <circle cx="350" cy="174" r="8"/>
     <circle cx="400" cy="154" r="8"/>
     <circle cx="450" cy="174" r="8"/>
+  </g>
+  <g stroke="#5b4438" stroke-width="6" stroke-linejoin="round">
+    <path d="M486 215.68c-3.6 -2.88 -3.6 10.08 0 7.2L495.84 220.36L495.84 216.76z" fill="#ff7fa6"/>
+    <path d="M510 215.68c3.6 -2.88 3.6 10.08 0 7.2L500.16 220.36L500.16 216.76z" fill="#ff7fa6"/>
+    <rect x="495.84" y="216.76" width="4.32" height="6.48" rx="1.2" fill="#ff7fa6"/>
   </g>
 </svg>

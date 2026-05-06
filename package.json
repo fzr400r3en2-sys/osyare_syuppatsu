@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "assets": "node tools/generate_assets.mjs",
+    "pwa": "node tools/generate_pwa_assets.mjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
   },

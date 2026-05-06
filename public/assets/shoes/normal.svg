@@ -1,4 +1,4 @@
-<svg viewBox="0 0 800 1000" xmlns="http://www.w3.org/2000/svg" data-draw-bounds="286 760 514 826">
+<svg viewBox="0 0 800 1000" xmlns="http://www.w3.org/2000/svg" data-draw-bounds="284 760 516 826">
   <g stroke="#5b4438" stroke-width="12" stroke-linejoin="round">
     <path d="M306 770h90c20 0 36 16 36 36v16H286v-20c0-18 10-32 20-32z" fill="#9b6b43"/>
     <path d="M404 770h90c10 0 20 14 20 32v20H368v-16c0-20 16-36 36-36z" fill="#9b6b43"/>
@@ -6,6 +6,16 @@
     <path d="M404 796h70" stroke="#fff0a8" stroke-linecap="round"/>
     <path d="M294 822h132M374 822h132" fill="none" stroke="#5b4438" stroke-width="8" opacity=".28"/>
   </g>
-  <ellipse cx="356" cy="780" rx="34" ry="10" fill="#ffffff" opacity=".22"/>
-  <ellipse cx="456" cy="780" rx="34" ry="10" fill="#ffffff" opacity=".22"/>
+  <ellipse cx="356" cy="780" rx="34" ry="10" fill="#ffffff" opacity=".28"/>
+  <ellipse cx="456" cy="780" rx="34" ry="10" fill="#ffffff" opacity=".28"/>
+  <g stroke="#5b4438" stroke-width="6" stroke-linejoin="round">
+    <path d="M344 781.68c-3.6 -2.88 -3.6 10.08 0 7.2L353.84 786.36L353.84 782.76z" fill="#ff7fa6"/>
+    <path d="M368 781.68c3.6 -2.88 3.6 10.08 0 7.2L358.16 786.36L358.16 782.76z" fill="#ff7fa6"/>
+    <rect x="353.84" y="782.76" width="4.32" height="6.48" rx="1.2" fill="#ff7fa6"/>
+  </g>
+  <g stroke="#5b4438" stroke-width="6" stroke-linejoin="round">
+    <path d="M444 781.68c-3.6 -2.88 -3.6 10.08 0 7.2L453.84 786.36L453.84 782.76z" fill="#ff7fa6"/>
+    <path d="M468 781.68c3.6 -2.88 3.6 10.08 0 7.2L458.16 786.36L458.16 782.76z" fill="#ff7fa6"/>
+    <rect x="453.84" y="782.76" width="4.32" height="6.48" rx="1.2" fill="#ff7fa6"/>
+  </g>
 </svg>

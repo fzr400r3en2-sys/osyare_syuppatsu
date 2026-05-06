@@ -1,15 +1,40 @@
 <svg viewBox="0 0 800 1000" xmlns="http://www.w3.org/2000/svg" data-draw-bounds="0 0 800 1000">
-  <rect width="800" height="1000" fill="#dcd9ff"/>
-  <rect y="620" width="800" height="380" fill="#ffe4ef"/>
+  <defs>
+    <linearGradient id="sleep-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e6e2ff"/>
+      <stop offset="100%" stop-color="#cec8f8"/>
+    </linearGradient>
+    <linearGradient id="sleep-floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffe4ef"/>
+      <stop offset="100%" stop-color="#f6c8d8"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#sleep-sky)"/>
+  <rect y="620" width="800" height="380" fill="url(#sleep-floor)"/>
   <path d="M0 620h800" stroke="#5b4438" stroke-width="8" opacity=".22"/>
   <path d="M610 92c-50 22-70 82-43 130 26 48 86 65 132 40-20 48-78 80-136 67-72-16-116-88-100-160 12-52 52-88 102-101 17-4 35-3 45 24z" fill="#fff0a6"/>
+  <path d="M598 110c-26 14-38 50-22 80 16 30 50 38 76 22-12 28-46 50-78 40-44-10-68-58-58-104 8-34 32-58 64-66 12-4 22-2 18 28z" fill="#fff7c8" opacity=".7"/>
   <g fill="#fff4a7">
-    <path d="M174.0 147.0L185.2 174.6L214.9 176.7L192.1 195.9L199.3 224.8L174.0 209.0L148.7 224.8L155.9 195.9L133.1 176.7L162.8 174.6z"/>
-    <path d="M314.0 235.0L322.2 255.7L344.4 257.1L327.3 271.3L332.8 292.9L314.0 281.0L295.2 292.9L300.7 271.3L283.6 257.1L305.8 255.7z"/>
-    <path d="M684.0 379.0L694.0 404.2L721.1 405.9L700.2 423.3L706.9 449.6L684.0 435.0L661.1 449.6L667.8 423.3L646.9 405.9L674.0 404.2z"/>
+    <path d="M174 147L185.17 174.63L214.9 176.71L192.07 195.87L199.27 224.79L174 209L148.73 224.79L155.93 195.87L133.1 176.71L162.83 174.63z"/>
+    <path d="M314 235L322.23 255.67L344.43 257.11L327.31 271.33L332.81 292.89L314 281L295.19 292.89L300.69 271.33L283.57 257.11L305.77 255.67z"/>
+    <path d="M684 379L693.99 404.25L721.09 405.95L700.17 423.25L706.92 449.55L684 435L661.08 449.55L667.83 423.25L646.91 405.95L674.01 404.25z"/>
+    <path d="M120 370L125.29 384.72L140.92 385.2L128.56 394.78L132.93 409.8L120 401L107.07 409.8L111.44 394.78L99.08 385.2L114.71 384.72z"/>
+    <path d="M420 144L425.88 159.91L442.83 160.58L429.51 171.09L434.11 187.42L420 178L405.89 187.42L410.49 171.09L397.17 160.58L414.12 159.91z"/>
   </g>
-  <path d="M244 395.04C217.6 379.2 222 360.5 235.64 360.5C241.36 360.5 244 364.9 244 369.96C244 364.9 246.64 360.5 252.36 360.5C266 360.5 270.4 379.2 244 395.04z" fill="#ffb8d1" opacity=".42"/>
-  <rect x="84" y="604" width="632" height="122" rx="46" fill="#ffffff" stroke="#5b4438" stroke-width="10" opacity=".55"/>
-  <rect x="124" y="560" width="180" height="110" rx="34" fill="#bfefff" stroke="#5b4438" stroke-width="10" opacity=".8"/>
-  <path d="M130 650c118 38 314 38 568 0" fill="none" stroke="#ffffff" stroke-width="12" opacity=".42"/>
+  <g fill="#ffffff" opacity=".62">
+    <circle cx="174" cy="186" r="6"/>
+    <circle cx="314" cy="263" r="5"/>
+    <circle cx="684" cy="414" r="6"/>
+  </g>
+  <path d="M244 395.04C217.6 379.2 222 360.5 235.64 360.5C241.36 360.5 244 364.9 244 369.96C244 364.9 246.64 360.5 252.36 360.5C266 360.5 270.4 379.2 244 395.04z" fill="#ffb8d1" opacity=".48"/>
+  <path d="M540 317.76C518.4 304.8 522 289.5 533.16 289.5C537.84 289.5 540 293.1 540 297.24C540 293.1 542.16 289.5 546.84 289.5C558 289.5 561.6 304.8 540 317.76z" fill="#ffb8d1" opacity=".4"/>
+  <rect x="84" y="604" width="632" height="122" rx="46" fill="#ffffff" stroke="#5b4438" stroke-width="10" opacity=".58"/>
+  <rect x="124" y="560" width="180" height="110" rx="34" fill="#bfefff" stroke="#5b4438" stroke-width="10" opacity=".84"/>
+  <path d="M132 612c50 30 110 30 158 0" fill="none" stroke="#ffffff" stroke-width="9" opacity=".66"/>
+  <path d="M130 650c118 38 314 38 568 0" fill="none" stroke="#ffffff" stroke-width="12" opacity=".46"/>
+  <g transform="translate(146 524)">
+    <ellipse cx="0" cy="0" rx="34" ry="14" fill="#fff8d9" stroke="#5b4438" stroke-width="6"/>
+    <path d="M-12 0v-40h24v40" fill="#fff8d9" stroke="#5b4438" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M0 -42c-22 0-32-22-12-30 14-6 32 0 32 14 0 10-8 16-20 16z" fill="#fff2a6" stroke="#5b4438" stroke-width="6"/>
+  </g>
 </svg>

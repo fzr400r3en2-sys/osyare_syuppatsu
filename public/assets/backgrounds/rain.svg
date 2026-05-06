@@ -1,17 +1,46 @@
 <svg viewBox="0 0 800 1000" xmlns="http://www.w3.org/2000/svg" data-draw-bounds="0 0 800 1000">
-  <rect width="800" height="1000" fill="#b9d7e8"/>
-  <path d="M0 0h800v580c-160 55-294 44-414-18-130 56-258 56-386 0z" fill="#9fb6c5"/>
-  <path d="M60 230c58-54 132-54 190 0 48-34 116-30 160 12 54-42 124-34 168 18" fill="none" stroke="#eef7ff" stroke-width="42" stroke-linecap="round" opacity=".82"/>
-  <g fill="#65b7ef" opacity=".72">
+  <defs>
+    <linearGradient id="rain-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c1d8e7"/>
+      <stop offset="100%" stop-color="#9eb9cd"/>
+    </linearGradient>
+    <linearGradient id="rain-ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a4dfc2"/>
+      <stop offset="100%" stop-color="#79c4a0"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#rain-sky)"/>
+  <g opacity=".46" fill="none" stroke-width="20" stroke-linecap="round">
+    <path d="M-40 460c160 0 200-80 360-80s200 80 360 80" stroke="#ffd9e9"/>
+    <path d="M-40 480c160 0 200-80 360-80s200 80 360 80" stroke="#fce0a4" opacity=".6"/>
+    <path d="M-40 500c160 0 200-80 360-80s200 80 360 80" stroke="#bce0a4" opacity=".5"/>
+    <path d="M-40 520c160 0 200-80 360-80s200 80 360 80" stroke="#a3d4ee" opacity=".5"/>
+  </g>
+  <path d="M0 0h800v580c-160 55-294 44-414-18-130 56-258 56-386 0z" fill="#9fb6c5" opacity=".82"/>
+  <path d="M60 230c58-54 132-54 190 0 48-34 116-30 160 12 54-42 124-34 168 18" fill="none" stroke="#eef7ff" stroke-width="42" stroke-linecap="round" opacity=".88"/>
+  <g fill="#65b7ef" opacity=".74">
     <path d="M154 330c18 30 28 50 28 68a28 28 0 1 1-56 0c0-18 10-38 28-68z"/>
     <path d="M324 282c18 30 28 50 28 68a28 28 0 1 1-56 0c0-18 10-38 28-68z"/>
     <path d="M498 344c18 30 28 50 28 68a28 28 0 1 1-56 0c0-18 10-38 28-68z"/>
     <path d="M660 286c18 30 28 50 28 68a28 28 0 1 1-56 0c0-18 10-38 28-68z"/>
   </g>
-  <rect y="624" width="800" height="376" fill="#8ad0ad"/>
-  <ellipse cx="250" cy="780" rx="160" ry="44" fill="#66bde8" opacity=".7"/>
-  <ellipse cx="570" cy="704" rx="98" ry="28" fill="#66bde8" opacity=".58"/>
-  <ellipse cx="250" cy="770" rx="92" ry="18" fill="#ffffff" opacity=".22"/>
-  <ellipse cx="570" cy="696" rx="56" ry="11" fill="#ffffff" opacity=".2"/>
-  <path d="M0 642c112 28 220 28 326-4 146 42 304 42 474 0" fill="none" stroke="#ffffff" stroke-width="10" opacity=".2"/>
+  <g fill="#ffffff" opacity=".7">
+    <ellipse cx="154" cy="370" rx="6" ry="11"/>
+    <ellipse cx="324" cy="322" rx="6" ry="11"/>
+    <ellipse cx="498" cy="384" rx="6" ry="11"/>
+    <ellipse cx="660" cy="326" rx="6" ry="11"/>
+  </g>
+  <rect y="624" width="800" height="376" fill="url(#rain-ground)"/>
+  <ellipse cx="250" cy="780" rx="160" ry="44" fill="#66bde8" opacity=".78"/>
+  <ellipse cx="570" cy="704" rx="98" ry="28" fill="#66bde8" opacity=".66"/>
+  <ellipse cx="250" cy="770" rx="92" ry="18" fill="#ffffff" opacity=".3"/>
+  <ellipse cx="570" cy="696" rx="56" ry="11" fill="#ffffff" opacity=".26"/>
+  <g fill="#ffffff" opacity=".4">
+    <circle cx="186" cy="770" r="6"/>
+    <circle cx="244" cy="752" r="5"/>
+    <circle cx="320" cy="780" r="6"/>
+    <circle cx="552" cy="690" r="5"/>
+    <circle cx="612" cy="704" r="5"/>
+  </g>
+  <path d="M0 642c112 28 220 28 326-4 146 42 304 42 474 0" fill="none" stroke="#ffffff" stroke-width="10" opacity=".26"/>
 </svg>

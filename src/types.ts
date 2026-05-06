@@ -2,7 +2,11 @@ export type DestinationId = "park" | "rain" | "sleep";
 
 export type CategoryId = "hat" | "clothes" | "shoes" | "item";
 
+export type PartTheme = "park" | "rain" | "sleep";
+
 export type SoundName = "dress" | "sparkle" | "launch" | "reset" | "toggle";
+
+export type AssetPath = `${string}.${"svg" | "png" | "webp"}`;
 
 export interface CategoryDefinition {
   id: CategoryId;
@@ -15,9 +19,12 @@ export interface DressItem {
   category: CategoryId;
   name: string;
   shortName: string;
-  asset: string;
-  worldEffect?: string;
-  rewardEffect?: string;
+  asset: AssetPath;
+  partTheme?: PartTheme;
+  partAsset?: AssetPath;
+  fullbodyAsset?: AssetPath;
+  worldEffect?: AssetPath;
+  rewardEffect?: AssetPath;
 }
 
 export type SelectionIndexes = Record<CategoryId, number>;
@@ -29,7 +36,7 @@ export interface Destination {
   title: string;
   shortTitle: string;
   sceneryLabel: string;
-  bgAsset: string;
+  bgAsset: AssetPath;
   rewardLine: string;
   matchItems: Record<CategoryId, string>;
   matchLines: {

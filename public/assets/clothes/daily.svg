@@ -1,16 +1,23 @@
-<svg viewBox="0 0 800 1000" xmlns="http://www.w3.org/2000/svg" data-draw-bounds="262 398 538 714">
+<svg viewBox="0 0 800 1000" xmlns="http://www.w3.org/2000/svg" data-draw-bounds="256 398 544 720">
   <g stroke="#5b4438" stroke-width="12" stroke-linejoin="round">
     <path d="M302 410c36-36 160-36 196 0l40 72-62 38-16-35v116H340V485l-16 35-62-38z" fill="#ffffff"/>
     <path d="M332 424c34 18 102 18 136 0" fill="none" stroke="#fff6c8" stroke-width="9" stroke-linecap="round"/>
     <path d="M334 596h132l22 100H312z" fill="#7fd7ff"/>
     <path d="M334 596l-18 100" fill="none" stroke-linecap="round"/>
     <path d="M466 596l18 100" fill="none" stroke-linecap="round"/>
-    <path d="M348 630h104" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity=".72"/>
+    <path d="M348 630h104" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity=".75"/>
   </g>
-  <circle cx="400" cy="465" r="18" fill="#ff9db0"/>
-  <path d="M444 540.48C427.2 530.4 430 518.5 438.68 518.5C442.32 518.5 444 521.3 444 524.52C444 521.3 445.68 518.5 449.32 518.5C458 518.5 460.8 530.4 444 540.48z" fill="#ffb8d1" opacity=".8"/>
-  <g stroke="#5b4438" stroke-width="6" stroke-linecap="round" opacity=".28">
-    <path d="M350 450l-22 22"/>
-    <path d="M450 450l22 22"/>
+  <path d="M310 690Q320 704 330 690Q340 704 350 690Q360 704 370 690Q380 704 390 690Q400 704 410 690Q420 704 430 690Q440 704 450 690Q460 704 470 690Q480 704 490 690" fill="#ffffff" stroke="#5b4438" stroke-width="5" stroke-linejoin="round"/>
+  <g stroke="#5b4438" stroke-width="6" stroke-linejoin="round">
+    <path d="M382 425.52c-5.4 -4.32 -5.4 15.12 0 10.8L396.76 432.54L396.76 427.14z" fill="#ff7fa6"/>
+    <path d="M418 425.52c5.4 -4.32 5.4 15.12 0 10.8L403.24 432.54L403.24 427.14z" fill="#ff7fa6"/>
+    <rect x="396.76" y="427.14" width="6.48" height="9.72" rx="1.8" fill="#ff7fa6"/>
+  </g>
+  <circle cx="400" cy="465" r="14" fill="#ff8aa0" opacity=".82"/>
+  <path d="M444 543.84C429.6 535.2 432 525 439.44 525C442.56 525 444 527.4 444 530.16C444 527.4 445.44 525 448.56 525C456 525 458.4 535.2 444 543.84z" fill="#ffb8d1" opacity=".82"/>
+  <path d="M356 543.84C341.6 535.2 344 525 351.44 525C354.56 525 356 527.4 356 530.16C356 527.4 357.44 525 360.56 525C368 525 370.4 535.2 356 543.84z" fill="#ffb8d1" opacity=".82"/>
+  <g stroke="#5b4438" stroke-width="5" stroke-linecap="round" opacity=".22">
+    <path d="M354 458l-18 18"/>
+    <path d="M446 458l18 18"/>
   </g>
 </svg>

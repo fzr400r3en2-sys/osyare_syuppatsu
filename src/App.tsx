@@ -4,13 +4,20 @@ import {
   categoryOrder,
   destinations,
   getCompatibilityScore,
-  getPreparedCount,
-  getReactionText,
   getSelectedItems,
   initialSelections,
   itemsByCategory,
 } from "./data";
-import type { CategoryDefinition, CategoryId, Destination, SelectedItems, SelectionIndexes } from "./types";
+import type {
+  AssetPath,
+  CategoryDefinition,
+  CategoryId,
+  Destination,
+  DressItem,
+  PartTheme,
+  SelectedItems,
+  SelectionIndexes,
+} from "./types";
 
 const overrideModules = import.meta.glob<string>("./overrideAssets/**/*.{png,webp}", {
   eager: true,
@@ -25,22 +32,83 @@ const overrideAssets = new Map<string, string>(
 );
 const assetRoot = `${import.meta.env.BASE_URL}assets/`;
 const rewardOverlayAsset = "overlays/confetti.svg";
+const finalStepIndex = categoryOrder.length;
+const fallbackPartTheme: PartTheme = "park";
+const hiddenOptionIds: Partial<Record<CategoryId, Set<string>>> = {
+  hat: new Set(["none"]),
+  clothes: new Set(["daily"]),
+  shoes: new Set(["normal-shoes"]),
+};
 
-function resolveAsset(asset: string) {
-  return overrideAssets.get(asset.replace(/\.svg$/i, "")) ?? `${assetRoot}${asset}`;
+const categoryGuidance: Record<CategoryId, string> = {
+  hat: "ぼうしを えらぼう",
+  clothes: "ふくを えらぼう",
+  shoes: "くつを えらぼう",
+  item: "もちものを えらぼう",
+};
+
+const categoryPickedText: Record<CategoryId, string> = {
+  hat: "ぼうし いいね！",
+  clothes: "ふく いいね！",
+  shoes: "くつ いいね！",
+  item: "もちもの いいね！",
+};
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
+
+function assetKey(asset: AssetPath) {
+  return asset.replace(/\.(svg|png|webp)$/i, "");
 }
 
-function uniqueAssets(assets: Array<string | undefined>) {
-  return Array.from(new Set(assets.filter((asset): asset is string => Boolean(asset))));
+function resolveAsset(asset: AssetPath) {
+  return overrideAssets.get(assetKey(asset)) ?? `${assetRoot}${asset}`;
+}
+
+function uniqueAssets(assets: Array<AssetPath | undefined>) {
+  return Array.from(new Set(assets.filter((asset): asset is AssetPath => Boolean(asset))));
 }
 
 function selectedItemList(selectedItems: SelectedItems) {
   return categoryOrder.map((category) => selectedItems[category.id]);
 }
 
-function LayerImage({ asset, className }: { asset: string; className: string }) {
-  const assetClassName = asset
-    .replace(/\.svg$/i, "")
+function getPartTheme(item: DressItem): PartTheme {
+  return item.partTheme ?? fallbackPartTheme;
+}
+
+function getRewardAsset(headTheme: PartTheme, bodyTheme: PartTheme, feetTheme: PartTheme): AssetPath {
+  return `generated/reward/reward-h${headTheme}-b${bodyTheme}-f${feetTheme}.png` as AssetPath;
+}
+
+function getCharacterAsset(selectedItems: SelectedItems): AssetPath {
+  return getRewardAsset(
+    getPartTheme(selectedItems.hat),
+    getPartTheme(selectedItems.clothes),
+    getPartTheme(selectedItems.shoes),
+  );
+}
+
+const warnedMissingAssets = new Set<string>();
+function warnMissingAsset(asset: AssetPath) {
+  if (!import.meta.env.DEV) return;
+  if (warnedMissingAssets.has(asset)) return;
+  warnedMissingAssets.add(asset);
+  console.warn(`[character] missing image: ${asset}`);
+}
+
+function getVisibleCategoryItems(categoryId: CategoryId) {
+  const hiddenIds = hiddenOptionIds[categoryId];
+
+  return itemsByCategory[categoryId]
+    .map((item, itemIndex) => ({ item, itemIndex }))
+    .filter(({ item }) => !hiddenIds?.has(item.id));
+}
+
+function LayerImage({ asset, className }: { asset: AssetPath; className: string }) {
+  const assetClassName = assetKey(asset)
     .replace(/[^a-z0-9]+/gi, "-")
     .toLowerCase();
 
@@ -99,7 +167,12 @@ function Character({
   isReward: boolean;
   isCharging: boolean;
 }) {
-  const label = `${selectedItems.hat.name}、${selectedItems.clothes.name}、${selectedItems.shoes.name}、${selectedItems.item.name}`;
+  const label = `${selectedItems.hat.name}、${selectedItems.clothes.name}、${selectedItems.shoes.name}`;
+  const characterAsset = getCharacterAsset(selectedItems);
+  const characterAssetClassName = assetKey(characterAsset)
+    .replace(/[^a-z0-9]+/gi, "-")
+    .toLowerCase();
+  const modeClass = isReward ? "character-image-reward" : "character-image-dress";
 
   return (
     <div
@@ -109,13 +182,13 @@ function Character({
       role="img"
       aria-label={`おでかけのじゅんびをしたこども。${label}`}
     >
-      <LayerImage asset="character/base.svg" className="character-base" />
-      <LayerImage asset={selectedItems.clothes.asset} className="character-clothes" />
-      <LayerImage asset={selectedItems.shoes.asset} className="character-shoes" />
-      <LayerImage asset={selectedItems.hat.asset} className="character-hat" />
-      <LayerImage asset={selectedItems.item.asset} className="character-item" />
-      {/* 顔は専用レイヤーで最後に重ね、装備画像の上から目・頬・口を守ります。 */}
-      <LayerImage asset="character/face.svg" className="character-face" />
+      <img
+        className={`stage-layer character-image ${modeClass} asset-${characterAssetClassName}`}
+        src={resolveAsset(characterAsset)}
+        alt=""
+        draggable={false}
+        onError={() => warnMissingAsset(characterAsset)}
+      />
     </div>
   );
 }
@@ -144,36 +217,41 @@ function ReactionBubble({
   );
 }
 
-function PreparedTracker({
+function StepProgress({
   selections,
-  preparedCount,
+  currentCategoryIndex,
+  isFinalStep,
 }: {
   selections: SelectionIndexes;
-  preparedCount: number;
+  currentCategoryIndex: number;
+  isFinalStep: boolean;
 }) {
   return (
-    <div className={`prepared-tracker prepared-count-${preparedCount}`} aria-label={`じゅんび ${preparedCount}こ`}>
-      <span className="prepared-label">じゅんび</span>
-      <div className="prepared-steps" aria-hidden="true">
+    <div className="step-progress" aria-label="じゅんびのじゅんばん">
+      <div className="step-dots" aria-hidden="true">
         {categoryOrder.map((category) => {
-          const isFilled = selections[category.id] !== initialSelections[category.id];
+          const isCurrent = !isFinalStep && categoryOrder[currentCategoryIndex].id === category.id;
+          const isPicked = selections[category.id] !== initialSelections[category.id];
+          const selectedItem = itemsByCategory[category.id][selections[category.id]];
 
           return (
             <span
               key={category.id}
-              className={`prepared-step prepared-${category.id} ${isFilled ? "is-filled" : "is-empty"}`}
+              className={`step-dot step-${category.id} ${isCurrent ? "is-current" : ""} ${
+                isPicked ? "is-picked" : ""
+              }`}
             >
-              <span />
+              <img src={resolveAsset(selectedItem.asset)} alt="" draggable={false} />
             </span>
           );
         })}
       </div>
-      <span className="prepared-count">{preparedCount}/4</span>
+      <span className="step-count">{isFinalStep ? "できたよ" : `${currentCategoryIndex + 1}/${finalStepIndex}`}</span>
     </div>
   );
 }
 
-function CategorySelector({
+function CurrentCategorySelector({
   category,
   selectedIndex,
   onSelect,
@@ -183,12 +261,20 @@ function CategorySelector({
   onSelect: (itemIndex: number) => void;
 }) {
   const items = itemsByCategory[category.id];
+  const visibleItems = getVisibleCategoryItems(category.id);
+  const selectedItem = items[selectedIndex] ?? visibleItems[0]?.item;
+  const headingItem = visibleItems.some(({ item }) => item.id === selectedItem.id) ? selectedItem : visibleItems[0].item;
 
   return (
-    <div className={`category-row category-${category.id}`}>
-      <span className="category-label">{category.label}</span>
-      <span className="option-grid" role="group" aria-label={`${category.label}をえらぶ`}>
-        {items.map((item, itemIndex) => {
+    <div className={`current-category category-${category.id}`}>
+      <div className="current-heading">
+        <span className={`category-mark ${category.iconClass}`} aria-hidden="true">
+          <img src={resolveAsset(headingItem.asset)} alt="" draggable={false} />
+        </span>
+        <h2>{categoryGuidance[category.id]}</h2>
+      </div>
+      <div className="option-grid" role="group" aria-label={`${category.label}をえらぶ`}>
+        {visibleItems.map(({ item, itemIndex }) => {
           const isSelected = itemIndex === selectedIndex;
 
           return (
@@ -207,7 +293,41 @@ function CategorySelector({
             </button>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+function ConfirmationStep({ selectedItems }: { selectedItems: SelectedItems }) {
+  return (
+    <div className="confirmation-step">
+      <div className="current-heading final-heading">
+        <span className="category-mark icon-ready" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+          <span />
+        </span>
+        <h2>これで おでかけ！</h2>
+      </div>
+      <div className="selected-summary" aria-label="えらんだもの">
+        {categoryOrder.map((category) => {
+          const item = selectedItems[category.id];
+
+          return <SummaryItem key={category.id} category={category} item={item} />;
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SummaryItem({ category, item }: { category: CategoryDefinition; item: DressItem }) {
+  return (
+    <div className={`summary-card summary-${category.id} item-${item.id}`}>
+      <span className="summary-thumb" aria-hidden="true">
+        <img src={resolveAsset(item.asset)} alt="" draggable={false} />
       </span>
+      <span className="summary-label">{category.label}</span>
     </div>
   );
 }
@@ -226,20 +346,23 @@ function ChargeLights() {
 export default function App() {
   const [destinationIndex, setDestinationIndex] = useState(0);
   const [selections, setSelections] = useState<SelectionIndexes>(initialSelections);
+  const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [soundOn, setSoundOn] = useState(true);
   const [isReward, setIsReward] = useState(false);
   const [isCharging, setIsCharging] = useState(false);
-  const [reactionText, setReactionText] = useState("どれにする？");
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [reactionText, setReactionText] = useState(categoryGuidance[categoryOrder[0].id]);
   const [reactionKey, setReactionKey] = useState(0);
   const chargeTimerRef = useRef<number | null>(null);
 
   const destination = destinations[destinationIndex];
+  const currentCategory = categoryOrder[currentCategoryIndex] ?? categoryOrder[0];
+  const isFinalStep = currentCategoryIndex >= finalStepIndex;
   const selectedItems = useMemo(() => getSelectedItems(selections), [selections]);
   const compatibilityScore = useMemo(
     () => getCompatibilityScore(selectedItems, destination),
     [destination, selectedItems],
   );
-  const preparedCount = useMemo(() => getPreparedCount(selections), [selections]);
 
   function clearChargeTimer() {
     if (chargeTimerRef.current !== null) {
@@ -251,18 +374,23 @@ export default function App() {
   useEffect(() => () => clearChargeTimer(), []);
 
   useEffect(() => {
-    if (!isReward) {
-      return undefined;
+    function handleBeforeInstallPrompt(event: Event) {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
     }
 
-    const timerId = window.setTimeout(() => {
-      setIsReward(false);
-      setReactionText("もういちど えらぼう");
-      setReactionKey((current) => current + 1);
-    }, 7800);
+    function handleAppInstalled() {
+      setInstallPrompt(null);
+    }
 
-    return () => window.clearTimeout(timerId);
-  }, [isReward]);
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
 
   function showReaction(text: string, soundName: "dress" | "sparkle" | "launch" | "reset" | "toggle") {
     setReactionText(text);
@@ -275,18 +403,13 @@ export default function App() {
       ...selections,
       [categoryId]: itemIndex,
     };
-    const nextItems = getSelectedItems(nextSelections);
-    const nextScore = getCompatibilityScore(nextItems, destination);
-    const nextPreparedCount = getPreparedCount(nextSelections);
+    const nextItem = itemsByCategory[categoryId][itemIndex];
 
     setSelections(nextSelections);
     setIsReward(false);
     setIsCharging(false);
     clearChargeTimer();
-    showReaction(
-      getReactionText(nextPreparedCount, nextScore, destination),
-      nextScore >= 2 || nextScore > compatibilityScore ? "sparkle" : "dress",
-    );
+    showReaction(nextItem.id === "none" ? categoryGuidance[categoryId] : categoryPickedText[categoryId], "dress");
   }
 
   function nextDestination() {
@@ -302,9 +425,36 @@ export default function App() {
   function resetDressUp() {
     clearChargeTimer();
     setSelections(initialSelections);
+    setCurrentCategoryIndex(0);
     setIsReward(false);
     setIsCharging(false);
-    showReaction("さいしょに もどそう", "reset");
+    showReaction(categoryGuidance[categoryOrder[0].id], "reset");
+  }
+
+  function goNextStep() {
+    if (isFinalStep) {
+      return;
+    }
+
+    const nextIndex = Math.min(currentCategoryIndex + 1, finalStepIndex);
+    clearChargeTimer();
+    setIsReward(false);
+    setIsCharging(false);
+    setCurrentCategoryIndex(nextIndex);
+    showReaction(nextIndex === finalStepIndex ? "これで おでかけ！" : categoryGuidance[categoryOrder[nextIndex].id], "toggle");
+  }
+
+  function goBackStep() {
+    if (currentCategoryIndex === 0) {
+      return;
+    }
+
+    const nextIndex = currentCategoryIndex - 1;
+    clearChargeTimer();
+    setIsReward(false);
+    setIsCharging(false);
+    setCurrentCategoryIndex(nextIndex);
+    showReaction(categoryGuidance[categoryOrder[nextIndex].id], "toggle");
   }
 
   function launchReward() {
@@ -326,9 +476,10 @@ export default function App() {
   function playAgain() {
     clearChargeTimer();
     setSelections(initialSelections);
+    setCurrentCategoryIndex(0);
     setIsReward(false);
     setIsCharging(false);
-    showReaction("もういちど えらぼう", "reset");
+    showReaction(categoryGuidance[categoryOrder[0].id], "reset");
   }
 
   function toggleSound() {
@@ -339,6 +490,15 @@ export default function App() {
       }
       return next;
     });
+  }
+
+  function installApp() {
+    if (!installPrompt) {
+      return;
+    }
+
+    installPrompt.prompt().catch(() => undefined);
+    installPrompt.userChoice.finally(() => setInstallPrompt(null));
   }
 
   return (
@@ -371,6 +531,11 @@ export default function App() {
           >
             {soundOn ? "おとON" : "しずか"}
           </button>
+          {installPrompt ? (
+            <button type="button" className="parent-button install-button" onClick={installApp} aria-label="アプリとして入れる">
+              入れる
+            </button>
+          ) : null}
           <button type="button" className="parent-button reset-button" onClick={resetDressUp} aria-label="さいしょにもどす">
             <span aria-hidden="true">↺</span>
           </button>
@@ -386,7 +551,6 @@ export default function App() {
         />
         <Character selectedItems={selectedItems} destination={destination} isReward={isReward} isCharging={isCharging} />
         {isCharging ? <ChargeLights /> : null}
-        <PreparedTracker selections={selections} preparedCount={preparedCount} />
         <ReactionBubble text={reactionText} reactionKey={reactionKey} compatibilityScore={compatibilityScore} />
       </section>
 
@@ -396,27 +560,44 @@ export default function App() {
             もういっかい
           </button>
         ) : (
-          <>
-            <div className="category-panel">
-              {categoryOrder.map((category) => (
-                <CategorySelector
-                  key={category.id}
-                  category={category}
-                  selectedIndex={selections[category.id]}
-                  onSelect={(itemIndex) => selectCategoryItem(category.id, itemIndex)}
-                />
-              ))}
+          <div className={`step-panel ${isFinalStep ? "is-final-step" : ""}`}>
+            <StepProgress selections={selections} currentCategoryIndex={currentCategoryIndex} isFinalStep={isFinalStep} />
+            {isFinalStep ? (
+              <ConfirmationStep selectedItems={selectedItems} />
+            ) : (
+              <CurrentCategorySelector
+                category={currentCategory}
+                selectedIndex={selections[currentCategory.id]}
+                onSelect={(itemIndex) => selectCategoryItem(currentCategory.id, itemIndex)}
+              />
+            )}
+            <div className="step-actions">
+              <button
+                type="button"
+                className="back-button"
+                onClick={goBackStep}
+                disabled={currentCategoryIndex === 0 || isCharging}
+                aria-label="ひとつまえにもどる"
+              >
+                もどる
+              </button>
+              {isFinalStep ? (
+                <button
+                  type="button"
+                  className="launch-button"
+                  onClick={launchReward}
+                  aria-label="しゅっぱつする"
+                  disabled={isCharging}
+                >
+                  しゅっぱーつ！
+                </button>
+              ) : (
+                <button type="button" className="next-button" onClick={goNextStep} disabled={isCharging} aria-label="つぎへ">
+                  つぎ
+                </button>
+              )}
             </div>
-            <button
-              type="button"
-              className="launch-button"
-              onClick={launchReward}
-              aria-label="しゅっぱつする"
-              disabled={isCharging}
-            >
-              しゅっぱーつ！
-            </button>
-          </>
+          </div>
         )}
       </footer>
     </main>
