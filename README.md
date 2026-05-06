@@ -347,7 +347,7 @@ Viteの `base` は、初回MVPでは `./` にしています。GitHub Pagesで�
 https://fzr400r3en2-sys.github.io/osyare_syuppatsu/
 ```
 
-`main` に push すると `.github/workflows/deploy-pages.yml` が `npm run build` を実行し、`dist` をGitHub Pagesへ公開します。QRコードは `public/install-qr.svg` と `docs/install-qr.svg` に生成されます。
+`main` に push すると `.github/workflows/deploy-pages.yml` が `npm run build` を実行し、`dist` をGitHub Pagesへ公開します。QRコードは `public/install-qr.svg` / `public/install-qr.png` と `docs/install-qr.svg` / `docs/install-qr.png` に生成されます。
 
 ```bash
 npm run pwa

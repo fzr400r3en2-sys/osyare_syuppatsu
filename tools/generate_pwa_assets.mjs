@@ -169,13 +169,20 @@ function gfMul(a, b) {
 }
 
 function reedSolomonGenerator(degree) {
-  const result = [1];
+  const result = Array(degree).fill(0);
+  result[degree - 1] = 1;
+  let root = 1;
+
   for (let i = 0; i < degree; i += 1) {
-    result.push(0);
-    for (let j = 0; j < result.length - 1; j += 1) {
-      result[j] = gfMul(result[j], gfExp[i]) ^ result[j + 1];
+    for (let j = 0; j < degree; j += 1) {
+      result[j] = gfMul(result[j], root);
+      if (j + 1 < degree) {
+        result[j] ^= result[j + 1];
+      }
     }
+    root = gfMul(root, 0x02);
   }
+
   return result;
 }
 
@@ -246,6 +253,20 @@ function makeQrCode(text) {
     reserved[row][col] = true;
   }
 
+  function reserveModule(col, row) {
+    reserved[row][col] = true;
+  }
+
+  function reserveFormatModules() {
+    for (let i = 0; i <= 5; i += 1) reserveModule(8, i);
+    reserveModule(8, 7);
+    reserveModule(8, 8);
+    reserveModule(7, 8);
+    for (let i = 9; i < 15; i += 1) reserveModule(14 - i, 8);
+    for (let i = 0; i < 8; i += 1) reserveModule(size - 1 - i, 8);
+    for (let i = 8; i < 15; i += 1) reserveModule(8, size - 15 + i);
+  }
+
   function drawFinder(col, row) {
     for (let dy = -1; dy <= 7; dy += 1) {
       for (let dx = -1; dx <= 7; dx += 1) {
@@ -275,6 +296,7 @@ function makeQrCode(text) {
     setFunctionModule(i, 6, i % 2 === 0);
   }
   setFunctionModule(8, size - 8, true);
+  reserveFormatModules();
 
   const allBits = bytesToBits(codewords);
   let bitIndex = 0;
@@ -313,11 +335,11 @@ function makeQrCode(text) {
   return modules;
 }
 
-function qrSvg(text) {
+function qrRectData(text) {
   const modules = makeQrCode(text);
   const moduleCount = modules.length;
-  const quiet = 4;
-  const scale = 12;
+  const quiet = 5;
+  const scale = 14;
   const size = (moduleCount + quiet * 2) * scale;
   const rects = [];
 
@@ -329,16 +351,45 @@ function qrSvg(text) {
     }
   }
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size + 72}" role="img" aria-label="おしゃれして しゅっぱつ！を開くQRコード">
-  <rect width="${size}" height="${size + 72}" rx="24" fill="#fff8e8"/>
-  <rect x="0" y="0" width="${size}" height="${size}" fill="#ffffff"/>
-  <g fill="#3f302b">
+  return { modules, moduleCount, quiet, scale, size, rects };
+}
+
+function qrSvg(text) {
+  const { size, rects } = qrRectData(text);
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" role="img" aria-label="おしゃれして しゅっぱつ！を開くQRコード" shape-rendering="crispEdges">
+  <rect width="${size}" height="${size}" fill="#ffffff"/>
+  <g fill="#000000">
     ${rects.join("\n    ")}
   </g>
-  <text x="${size / 2}" y="${size + 28}" text-anchor="middle" font-family="sans-serif" font-size="24" font-weight="700" fill="#4f3b34">おしゃれして しゅっぱつ！</text>
-  <text x="${size / 2}" y="${size + 56}" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#6a5144">${text}</text>
 </svg>
 `;
+}
+
+function qrPng(text) {
+  const modules = makeQrCode(text);
+  const moduleCount = modules.length;
+  const quiet = 6;
+  const scale = 18;
+  const size = (moduleCount + quiet * 2) * scale;
+  const pixels = Buffer.alloc(size * size * 4, 255);
+  const black = hexToRgba("#000000");
+
+  for (let row = 0; row < moduleCount; row += 1) {
+    for (let col = 0; col < moduleCount; col += 1) {
+      if (!modules[row][col]) continue;
+
+      const x0 = (col + quiet) * scale;
+      const y0 = (row + quiet) * scale;
+      for (let y = y0; y < y0 + scale; y += 1) {
+        for (let x = x0; x < x0 + scale; x += 1) {
+          pixels.set(black, (y * size + x) * 4);
+        }
+      }
+    }
+  }
+
+  return png(size, size, pixels);
 }
 
 function write(file, contents) {
@@ -350,6 +401,8 @@ write(join(publicRoot, "icons", "icon-192.png"), drawIcon(192));
 write(join(publicRoot, "icons", "icon-512.png"), drawIcon(512));
 write(join(publicRoot, "icons", "icon-maskable-512.png"), drawIcon(512, true));
 write(join(publicRoot, "install-qr.svg"), qrSvg(appUrl));
+write(join(publicRoot, "install-qr.png"), qrPng(appUrl));
 write(join(docsRoot, "install-qr.svg"), qrSvg(appUrl));
+write(join(docsRoot, "install-qr.png"), qrPng(appUrl));
 
 console.log(`PWA icons and QR generated for ${appUrl}`);
